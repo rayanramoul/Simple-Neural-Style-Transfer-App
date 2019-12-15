@@ -22,15 +22,10 @@ class ContentLoss(nn.Module):
 
 def gram_matrix(input):
     a, b, c, d = input.size()  # a=batch size(=1)
-    # b=number of feature maps
-    # (c,d)=dimensions of a f. map (N=c*d)
 
     features = input.view(a * b, c * d)  # resise F_XL into \hat F_XL
 
     G = torch.mm(features, features.t())  # compute the gram product
-
-    # we 'normalize' the values of the gram matrix
-    # by dividing by the number of element in each feature maps.
     return G.div(a * b * c * d)
 
 
@@ -130,13 +125,13 @@ class Transf:
         return image.to(self.device, torch.float)
 
 
-    def imshow(self, tensor, filename):
+    def imshow(self, tensor, filename, size):
         image = tensor.cpu().clone()  # we clone the tensor to not do changes on it
         image = image.squeeze(0)      # remove the fake batch dimension
         image = self.unloader(image)
         print("Type of image : "+str(type(image)))
         try:
-            image.save(filename)
+            image.save(filename, dpi=size)
         except Exception as e:
             print("Exception occured : "+str(e))
         
@@ -148,7 +143,6 @@ class Transf:
 
 
     def run_style_transfer(self, content_img, style_img, input_img, num_steps=300, style_weight=1000000, content_weight=1):
-        """Run the style transfer."""
         print('Building the style transfer model..')
         model, style_losses, content_losses = self.get_style_model_and_losses(style_img, content_img)
         optimizer = self.get_input_optimizer(input_img)
@@ -178,9 +172,10 @@ class Transf:
                 loss.backward()
 
                 run[0] += 1
-                print("Epoch ("+str(run)+"/"+str(num_steps)+")")
-                print('Style Loss : {:4f} Content Loss: {:4f}'.format(
-                style_score.item(), content_score.item()))
+                if run[0]%100==0:
+                    print("Epoch ("+str(run[0])+"/"+str(num_steps)+")")
+                    print('Style Loss : {:4f} Content Loss: {:4f}'.format(
+                    style_score.item(), content_score.item()))
                 
                 return style_score + content_score
 
@@ -204,14 +199,14 @@ class Transf:
         print("Best size : "+str(size))
         im_resized = im.resize(size, Image.ANTIALIAS)
         im_resized2 = im2.resize(size, Image.ANTIALIAS)
-        im_resized.save("source.png", dpi=(600,600))
-        im_resized2.save("style.png", dpi=(600,600))
+        im_resized.save("source.png", dpi=size)
+        im_resized2.save("style.png", dpi=size)
 
         style_img = self.image_loader("style.png")
         content_img = self.image_loader("source.png")
         input_img = content_img.clone()
         output = self.run_style_transfer(content_img, style_img, input_img, num_steps=num_iterations)
-        self.imshow(output, filename)
+        self.imshow(output, filename, size)
         import os
-        os.remove("style.png")
-        os.remove("source.png")
+#        os.remove("style.png")
+#        os.remove("source.png")
