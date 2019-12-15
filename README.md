@@ -1,12 +1,12 @@
-# Simple-Neural-Style-Transfer-App
+# Simple Neural Style Transfer App
 A simple app to apply neural style transfer to your pictures.
 
 
 
 ## Preview
  <div align="center">
-      <img src="https://github.com/raysr/Simple-Neural-Style-Transfer-App/blob/master/resources/screen.png?raw=true" alt="App" style="border-style: dotted;border-color:##0a111c;"></img>
-      <img src="https://github.com/raysr/Simple-Neural-Style-Transfer-App/blob/master/resources/puppy_gen.jpg?raw=true" alt="Style Transfered" style="border-style: dotted;border-color:##0a111c;"></img>
+      <img src="https://github.com/raysr/Simple-Neural-Style-Transfer-App/blob/master/assets/screen.png?raw=true" alt="App" style="border-style: dotted;border-color:##0a111c;"></img>
+      <img src="https://github.com/raysr/Simple-Neural-Style-Transfer-App/blob/master/assets/puppy_gen.jpg?raw=true" alt="Style Transfered" style="border-style: dotted;border-color:##0a111c;"></img>
       </div>
 
 ### Installing
