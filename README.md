@@ -23,11 +23,11 @@ pip3 install -r requirements.txt
 ```
 
 ## Deployment
-
-cd into the directory cloned and :
+Execute the app
 ```
 python3 main.py
 ```
+Generate the picture, you will find it in the **generated** directory
 
 ## Built With
 
