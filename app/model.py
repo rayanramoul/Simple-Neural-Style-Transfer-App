@@ -130,15 +130,16 @@ class Transf:
         return image.to(self.device, torch.float)
 
 
-    def imshow(self, tensor, title=None):
+    def imshow(self, tensor, filename):
         image = tensor.cpu().clone()  # we clone the tensor to not do changes on it
         image = image.squeeze(0)      # remove the fake batch dimension
         image = self.unloader(image)
-        plt.imshow(image)
-        if title is not None:
-            plt.title(title)
-        plt.pause(0.001) # pause a bit so that plots are updated
-
+        print("Type of image : "+str(type(image)))
+        try:
+            image.save(filename)
+        except Exception as e:
+            print("Exception occured : "+str(e))
+        
 
     def get_input_optimizer(self, input_img):
         # this line to show that input is a parameter that requires a gradient
@@ -177,12 +178,10 @@ class Transf:
                 loss.backward()
 
                 run[0] += 1
-                if run[0] % 50 == 0:
-                    print("run {}:".format(run))
-                    print('Style Loss : {:4f} Content Loss: {:4f}'.format(
-                        style_score.item(), content_score.item()))
-                    print()
-
+                print("Epoch ("+str(run)+"/"+str(num_steps)+")")
+                print('Style Loss : {:4f} Content Loss: {:4f}'.format(
+                style_score.item(), content_score.item()))
+                
                 return style_score + content_score
 
             optimizer.step(closure)
@@ -192,13 +191,27 @@ class Transf:
         return input_img
 
 
-    def apply(self, source, style):
-        style_img = self.image_loader(style)
-        content_img = self.image_loader(source)
-        input_img = content_img.clone()
-        output = self.run_style_transfer(content_img, style_img, input_img)
-        plt.figure()
-        self.imshow(output, title="Result")
-        plt.ioff()
-        plt.show()  
+    def apply(self, source, style, filename, num_iterations):
+        im = Image.open(source)
+        l = im.size
+        
+        im2 = Image.open(style)
+        l2 = im2.size
+        
+        print("Source image size : "+str(l))
+        print("Style image size : "+str(l2))
+        size = l if l[0]*l[1]<l2[0]*l2[0] else l2
+        print("Best size : "+str(size))
+        im_resized = im.resize(size, Image.ANTIALIAS)
+        im_resized2 = im2.resize(size, Image.ANTIALIAS)
+        im_resized.save("source.png", dpi=(600,600))
+        im_resized2.save("style.png", dpi=(600,600))
 
+        style_img = self.image_loader("style.png")
+        content_img = self.image_loader("source.png")
+        input_img = content_img.clone()
+        output = self.run_style_transfer(content_img, style_img, input_img, num_steps=num_iterations)
+        self.imshow(output, filename)
+        import os
+        os.remove("style.png")
+        os.remove("source.png")
